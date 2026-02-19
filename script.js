@@ -319,95 +319,101 @@ async function autoRefresh() {
 loadSettings();
 setupSettingsListeners();
 autoRefresh();
-// ================= BLIZZARD MODE v2 (CYCLING) =================
+// ================= SNOWY DAY MODE (CYCLING) =================
 
 // 0 = normal
-// 1 = blizzard
-let BLIZZARD_STATE = 0;
+// 1 = snowy mode
+let SNOWY_STATE = 0;
 
 document.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === "N") {
-    BLIZZARD_STATE = (BLIZZARD_STATE + 1) % 2; // cycles 0 → 1 → 0 → 1...
+    SNOWY_STATE = (SNOWY_STATE + 1) % 2; // 0 → 1 → 0 → 1...
 
-    if (BLIZZARD_STATE === 1) {
-      activateBlizzardMode();
+    if (SNOWY_STATE === 1) {
+      activateSnowyMode();
     } else {
       getWeather(); // restore normal
     }
   }
 });
 
-function activateBlizzardMode() {
-  // Random absurd values
-  const temp = -(Math.floor(Math.random() * 60) + 10); // -10 to -70
-  const feels = temp - Math.floor(Math.random() * 40);
-  const wind = Math.floor(Math.random() * 80) + 20; // 20–100 mph
-  const gust = wind + Math.floor(Math.random() * 40);
-  const humidity = Math.floor(Math.random() * 40) + 60;
-  const visibility = (Math.random() * 0.5).toFixed(1);
-  const cloud = Math.floor(Math.random() * 40) + 80;
+function activateSnowyMode() {
+  // Realistic cold values (no negatives)
+  const temp = Math.floor(Math.random() * 15) + 30; // 30–45°F
+  const feels = temp - Math.floor(Math.random() * 8); // slightly colder
+  const wind = Math.floor(Math.random() * 15) + 5; // 5–20 mph
+  const gust = wind + Math.floor(Math.random() * 10);
+  const humidity = Math.floor(Math.random() * 30) + 60; // 60–90%
+  const visibility = (Math.random() * 3 + 1).toFixed(1); // 1–4 miles
+  const cloud = Math.floor(Math.random() * 20) + 80; // 80–100%
 
   const conditions = [
-    "Blizzard",
-    "Heavy Snow",
-    "Whiteout",
-    "Extreme Cold",
-    "Snow & Wind",
-    "Polar Outbreak",
-    "Arctic Blast",
-    "Ice Crystals",
-    "Freezing Fog",
-    "Snow Squall"
+    "Light Snow",
+    "Snow Showers",
+    "Flurries",
+    "Cloudy with Snow",
+    "Wintry Mix",
+    "Cold & Cloudy",
+    "Snow Likely",
+    "Passing Snow",
+    "Scattered Flurries"
   ];
 
   const condition = conditions[Math.floor(Math.random() * conditions.length)];
 
   // CURRENT CONDITIONS
   document.getElementById("current-content").innerHTML = `
-    <img src="https://cdn.weatherapi.com/weather/64x64/night/338.png">
+    <img src="https://cdn.weatherapi.com/weather/64x64/day/326.png">
     <h3>${temp}°F — ${condition}</h3>
     <p>Feels like: ${feels}°F</p>
     <p>Wind: ${wind} mph (gusts ${gust} mph)</p>
     <p>Humidity: ${humidity}%</p>
-    <p>UV Index: 0</p>
+    <p>UV Index: 1</p>
   `;
 
-  // HOURLY CHAOS
+  // HOURLY (cold but not insane)
   let hourlyHTML = "";
   for (let i = 0; i < 12; i++) {
-    const hTemp = temp - Math.floor(Math.random() * 20);
+    const hTemp = temp - Math.floor(Math.random() * 5);
+    const hCond = conditions[Math.floor(Math.random() * conditions.length)];
     hourlyHTML += `
       <div class="hour-block">
         <p>??:??</p>
-        <img src="https://cdn.weatherapi.com/weather/64x64/night/338.png">
+        <img src="https://cdn.weatherapi.com/weather/64x64/day/326.png">
         <p>${hTemp}°F</p>
       </div>
     `;
   }
   document.getElementById("hourly-content").innerHTML = hourlyHTML;
 
-  // FORECAST CHAOS
+  // FORECAST (one snowy day guaranteed)
   let forecastHTML = "";
+
   for (let i = 0; i < 3; i++) {
-    const fTemp = temp - Math.floor(Math.random() * 30);
-    const fCond = conditions[Math.floor(Math.random() * conditions.length)];
+    const isSnowDay = i === 0; // TODAY is always snowy
+    const fTemp = Math.floor(Math.random() * 15) + 30;
+    const fCond = isSnowDay
+      ? "Snow Showers"
+      : ["Cloudy", "Cold", "Partly Cloudy"][Math.floor(Math.random() * 3)];
+
     forecastHTML += `
       <div class="day-block">
-        <h4>???</h4>
-        <img src="https://cdn.weatherapi.com/weather/64x64/night/338.png">
+        <h4>${i === 0 ? "Today" : i === 1 ? "Tomorrow" : "Next Day"}</h4>
+        <img src="https://cdn.weatherapi.com/weather/64x64/day/${isSnowDay ? "326" : "122"}.png">
         <p>${fTemp}°F</p>
         <p>${fCond}</p>
       </div>
     `;
   }
+
   document.getElementById("forecast-content").innerHTML = forecastHTML;
 
   // GLANCE PANEL
   document.getElementById("visVal").textContent = `${visibility} mi`;
-  document.getElementById("pressureVal").textContent = `${28 + Math.random().toFixed(2)} inHg`;
-  document.getElementById("dewVal").textContent = `${temp - 5}°F`;
+  document.getElementById("pressureVal").textContent = `${29 + Math.random().toFixed(2)} inHg`;
+  document.getElementById("dewVal").textContent = `${temp - 3}°F`;
   document.getElementById("cloudVal").textContent = `${cloud}%`;
-  document.getElementById("uvVal").textContent = `0`;
+  document.getElementById("uvVal").textContent = `1`;
   document.getElementById("gustVal").textContent = `${gust} mph`;
 
   // HUMIDITY GAUGE
@@ -415,21 +421,21 @@ function activateBlizzardMode() {
   document.getElementById("humidityText").textContent = `${humidity}%`;
 
   // UV METER
-  document.getElementById("uvFill").style.width = "0%";
+  document.getElementById("uvFill").style.width = "10%";
 
   // WIND COMPASS
   document.getElementById("windDirText").textContent = `N at ${wind} mph`;
 
   // SUN CYCLE
   document.getElementById("sunArc").textContent =
-    `Sunrise: ??? • Sunset: ??? • Moon: Frozen`;
+    `Sunrise: ??? • Sunset: ??? • Moon: Waning`;
 
   // ALERTS
   document.getElementById("alertBox").innerHTML = `
-    <div style="border-left:4px solid #00d0ff; padding-left:10px;">
-      <strong>BLIZZARD WARNING</strong><br>
-      <span>Life-threatening cold and whiteout conditions.</span><br>
-      <small>Effective NOW → Whenever it stops.</small>
+    <div style="border-left:4px solid #4aa3ff; padding-left:10px;">
+      <strong>WINTER WEATHER ADVISORY</strong><br>
+      <span>Light snow expected today.</span><br>
+      <small>Effective NOW → This evening.</small>
     </div>
   `;
 
@@ -437,6 +443,7 @@ function activateBlizzardMode() {
   document.getElementById("miniWidget").innerHTML = `
     <p style="font-size:24px; margin:0;">${temp}°F</p>
     <p style="margin:0;">${condition}</p>
-    <p style="margin:0; font-size:12px;">Wind: ${wind} mph • Visibility: ${visibility} mi</p>
+    <p style="margin:0; font-size:12px;">Wind: ${wind} mph • Humidity: ${humidity}%</p>
   `;
 }
+
