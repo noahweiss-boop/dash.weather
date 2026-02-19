@@ -321,9 +321,9 @@ setupSettingsListeners();
 autoRefresh();
 // ================= SNOWY AFTERNOON MODE (CYCLING) =================
 
-// 0 = normal
-// 1 = snowy mode
-let SNOWY_STATE = 0;
+// ================= REALISTIC SNOWY AFTERNOON MODE =================
+
+let SNOWY_STATE = 0; // 0 = normal, 1 = snowy mode
 
 document.addEventListener("keydown", (e) => {
   if (e.ctrlKey && e.shiftKey && e.key === "N") {
@@ -332,110 +332,83 @@ document.addEventListener("keydown", (e) => {
     if (SNOWY_STATE === 1) {
       activateSnowyMode();
     } else {
-      getWeather(); // restore normal
+      getWeather(); // restore real data
     }
   }
 });
 
-function activateSnowyMode() {
-  // Realistic cold values
-  const temp = Math.floor(Math.random() * 8) + 34; // 34–41°F
-  const feels = temp - Math.floor(Math.random() * 5); // slightly colder
-  const wind = Math.floor(Math.random() * 10) + 5; // 5–15 mph
-  const gust = wind + Math.floor(Math.random() * 6);
-  const humidity = Math.floor(Math.random() * 20) + 70; // 70–90%
-  const cloud = Math.floor(Math.random() * 15) + 85; // 85–100%
+async function activateSnowyMode() {
+  // Fetch REAL weather first
+  const url = `https://api.weatherapi.com/v1/forecast.json?key=${API_KEY}&q=${encodeURIComponent(
+    LOCATION
+  )}&days=3&aqi=yes&alerts=yes`;
 
-  const snowyCondition = "Light Snow";
-  const normalCondition = "Cloudy";
+  const res = await fetch(url);
+  const data = await res.json();
 
-  // CURRENT CONDITIONS (cold + cloudy)
-  document.getElementById("current-content").innerHTML = `
-    <img src="https://cdn.weatherapi.com/weather/64x64/day/122.png">
-    <h3>${temp}°F — Cloudy</h3>
-    <p>Feels like: ${feels}°F</p>
-    <p>Wind: ${wind} mph (gusts ${gust} mph)</p>
-    <p>Humidity: ${humidity}%</p>
-    <p>UV Index: 1</p>
-  `;
+  // -------------------------
+  // MODIFY ONLY TODAY'S HOURS
+  // -------------------------
 
-  // HOURLY — ONLY AFTERNOON SNOW (1 PM → 5 PM)
-  let hourlyHTML = "";
-  const hours = ["09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00","20:00"];
+  const hours = data.forecast.forecastday[0].hour;
 
-  for (let i = 0; i < 12; i++) {
-    const hour = hours[i];
-    const isSnowHour = i >= 4 && i <= 8; // 13:00–17:00
+  // Afternoon snow window: 13:00–17:00 (1 PM → 5 PM)
+  const snowStart = 13;
+  const snowEnd = 17;
 
-    hourlyHTML += `
-      <div class="hour-block">
-        <p>${hour}</p>
-        <img src="https://cdn.weatherapi.com/weather/64x64/day/${isSnowHour ? "326" : "122"}.png">
-        <p>${isSnowHour ? temp - 2 : temp}°F</p>
-      </div>
-    `;
+  for (let h = snowStart; h <= snowEnd; h++) {
+    hours[h].condition.text = "Light Snow";
+    hours[h].condition.icon = "https://cdn.weatherapi.com/weather/64x64/day/326.png";
+
+    // Slightly colder but still realistic
+    hours[h].temp_f = Math.max(hours[h].temp_f - 3, 32);
+
+    // Slightly higher humidity
+    hours[h].humidity = Math.min(hours[h].humidity + 10, 100);
+
+    // Slightly lower visibility
+    hours[h].vis_miles = Math.max(hours[h].vis_miles - 2, 1);
   }
 
-  document.getElementById("hourly-content").innerHTML = hourlyHTML;
+  // -------------------------
+  // MODIFY ONLY TODAY'S SUMMARY
+  // -------------------------
 
-  // FORECAST — unchanged except TODAY shows snow icon
-  const forecastHTML = `
-    <div class="day-block">
-      <h4>Today</h4>
-      <img src="https://cdn.weatherapi.com/weather/64x64/day/326.png">
-      <p>${temp}°F</p>
-      <p>Light Snow (Afternoon)</p>
-    </div>
-    <div class="day-block">
-      <h4>Tomorrow</h4>
-      <img src="https://cdn.weatherapi.com/weather/64x64/day/122.png">
-      <p>${temp + 3}°F</p>
-      <p>Cloudy</p>
-    </div>
-    <div class="day-block">
-      <h4>Next Day</h4>
-      <img src="https://cdn.weatherapi.com/weather/64x64/day/116.png">
-      <p>${temp + 5}°F</p>
-      <p>Partly Cloudy</p>
-    </div>
-  `;
+  const today = data.forecast.forecastday[0].day;
+  today.condition.text = "Cloudy → Light Snow (Afternoon)";
+  today.condition.icon = "https://cdn.weatherapi.com/weather/64x64/day/326.png";
 
-  document.getElementById("forecast-content").innerHTML = forecastHTML;
+  // Slightly colder average temp
+  today.avgtemp_f = Math.max(today.avgtemp_f - 2, 32);
 
-  // GLANCE PANEL
-  document.getElementById("visVal").textContent = "3.5 mi";
-  document.getElementById("pressureVal").textContent = "29.8 inHg";
-  document.getElementById("dewVal").textContent = `${temp - 3}°F`;
-  document.getElementById("cloudVal").textContent = `${cloud}%`;
-  document.getElementById("uvVal").textContent = `1`;
-  document.getElementById("gustVal").textContent = `${gust} mph`;
+  // -------------------------
+  // RE-RENDER EVERYTHING USING THE MODIFIED REAL DATA
+  // -------------------------
 
-  // HUMIDITY GAUGE
-  document.getElementById("humidityFill").style.width = humidity + "%";
-  document.getElementById("humidityText").textContent = `${humidity}%`;
+  renderCurrent(data);
+  renderHourly(data);
+  renderForecast(data);
 
-  // UV METER
-  document.getElementById("uvFill").style.width = "10%";
+  // Glance panel stays real except we adjust cloud cover a bit
+  document.getElementById("cloudVal").textContent = `${Math.min(
+    data.current.cloud + 20,
+    100
+  )}%`;
 
-  // WIND COMPASS
-  document.getElementById("windDirText").textContent = `N at ${wind} mph`;
-
-  // SUN CYCLE — KEEP REAL VALUES (don’t overwrite)
-  // So we do NOTHING here
-
-  // ALERTS
+  // Alerts panel
   document.getElementById("alertBox").innerHTML = `
     <div style="border-left:4px solid #4aa3ff; padding-left:10px;">
       <strong>WINTER WEATHER ADVISORY</strong><br>
-      <span>Light afternoon snow expected today.</span><br>
+      <span>Brief afternoon snow expected today.</span><br>
       <small>1 PM → 5 PM</small>
     </div>
   `;
 
-  // MINI WIDGET
+  // Mini widget
   document.getElementById("miniWidget").innerHTML = `
-    <p style="font-size:24px; margin:0;">${temp}°F</p>
+    <p style="font-size:24px; margin:0;">${data.current.temp_f}°F</p>
     <p style="margin:0;">Cloudy → Light Snow</p>
-    <p style="margin:0; font-size:12px;">Wind: ${wind} mph • Humidity: ${humidity}%</p>
+    <p style="margin:0; font-size:12px;">Wind: ${data.current.wind_mph} mph • Humidity: ${data.current.humidity}%</p>
   `;
 }
+
