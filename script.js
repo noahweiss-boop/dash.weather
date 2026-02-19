@@ -319,3 +319,124 @@ async function autoRefresh() {
 loadSettings();
 setupSettingsListeners();
 autoRefresh();
+// ================= BLIZZARD MODE v2 (CYCLING) =================
+
+// 0 = normal
+// 1 = blizzard
+let BLIZZARD_STATE = 0;
+
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey && e.shiftKey && e.key === "N") {
+    BLIZZARD_STATE = (BLIZZARD_STATE + 1) % 2; // cycles 0 → 1 → 0 → 1...
+
+    if (BLIZZARD_STATE === 1) {
+      activateBlizzardMode();
+    } else {
+      getWeather(); // restore normal
+    }
+  }
+});
+
+function activateBlizzardMode() {
+  // Random absurd values
+  const temp = -(Math.floor(Math.random() * 60) + 10); // -10 to -70
+  const feels = temp - Math.floor(Math.random() * 40);
+  const wind = Math.floor(Math.random() * 80) + 20; // 20–100 mph
+  const gust = wind + Math.floor(Math.random() * 40);
+  const humidity = Math.floor(Math.random() * 40) + 60;
+  const visibility = (Math.random() * 0.5).toFixed(1);
+  const cloud = Math.floor(Math.random() * 40) + 80;
+
+  const conditions = [
+    "Blizzard",
+    "Heavy Snow",
+    "Whiteout",
+    "Extreme Cold",
+    "Snow & Wind",
+    "Polar Outbreak",
+    "Arctic Blast",
+    "Ice Crystals",
+    "Freezing Fog",
+    "Snow Squall"
+  ];
+
+  const condition = conditions[Math.floor(Math.random() * conditions.length)];
+
+  // CURRENT CONDITIONS
+  document.getElementById("current-content").innerHTML = `
+    <img src="https://cdn.weatherapi.com/weather/64x64/night/338.png">
+    <h3>${temp}°F — ${condition}</h3>
+    <p>Feels like: ${feels}°F</p>
+    <p>Wind: ${wind} mph (gusts ${gust} mph)</p>
+    <p>Humidity: ${humidity}%</p>
+    <p>UV Index: 0</p>
+  `;
+
+  // HOURLY CHAOS
+  let hourlyHTML = "";
+  for (let i = 0; i < 12; i++) {
+    const hTemp = temp - Math.floor(Math.random() * 20);
+    hourlyHTML += `
+      <div class="hour-block">
+        <p>??:??</p>
+        <img src="https://cdn.weatherapi.com/weather/64x64/night/338.png">
+        <p>${hTemp}°F</p>
+      </div>
+    `;
+  }
+  document.getElementById("hourly-content").innerHTML = hourlyHTML;
+
+  // FORECAST CHAOS
+  let forecastHTML = "";
+  for (let i = 0; i < 3; i++) {
+    const fTemp = temp - Math.floor(Math.random() * 30);
+    const fCond = conditions[Math.floor(Math.random() * conditions.length)];
+    forecastHTML += `
+      <div class="day-block">
+        <h4>???</h4>
+        <img src="https://cdn.weatherapi.com/weather/64x64/night/338.png">
+        <p>${fTemp}°F</p>
+        <p>${fCond}</p>
+      </div>
+    `;
+  }
+  document.getElementById("forecast-content").innerHTML = forecastHTML;
+
+  // GLANCE PANEL
+  document.getElementById("visVal").textContent = `${visibility} mi`;
+  document.getElementById("pressureVal").textContent = `${28 + Math.random().toFixed(2)} inHg`;
+  document.getElementById("dewVal").textContent = `${temp - 5}°F`;
+  document.getElementById("cloudVal").textContent = `${cloud}%`;
+  document.getElementById("uvVal").textContent = `0`;
+  document.getElementById("gustVal").textContent = `${gust} mph`;
+
+  // HUMIDITY GAUGE
+  document.getElementById("humidityFill").style.width = humidity + "%";
+  document.getElementById("humidityText").textContent = `${humidity}%`;
+
+  // UV METER
+  document.getElementById("uvFill").style.width = "0%";
+
+  // WIND COMPASS
+  document.getElementById("windDirText").textContent = `N at ${wind} mph`;
+
+  // SUN CYCLE
+  document.getElementById("sunArc").textContent =
+    `Sunrise: ??? • Sunset: ??? • Moon: Frozen`;
+
+  // ALERTS
+  document.getElementById("alertBox").innerHTML = `
+    <div style="border-left:4px solid #00d0ff; padding-left:10px;">
+      <strong>BLIZZARD WARNING</strong><br>
+      <span>Life-threatening cold and whiteout conditions.</span><br>
+      <small>Effective NOW → Whenever it stops.</small>
+    </div>
+  `;
+
+  // MINI WIDGET
+  document.getElementById("miniWidget").innerHTML = `
+    <p style="font-size:24px; margin:0;">${temp}°F</p>
+    <p style="margin:0;">${condition}</p>
+    <p style="margin:0; font-size:12px;">Wind: ${wind} mph • Visibility: ${visibility} mi</p>
+  `;
+}
