@@ -31,3 +31,12 @@ h1 {
   min-width: 120px;
   text-align: center;
 }
+
+#settings select {
+  background: #222;
+  color: #eee;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #444;
+}
+
