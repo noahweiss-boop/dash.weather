@@ -1,0 +1,33 @@
+body {
+  background: #111;
+  color: #eee;
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.card {
+  background: #1a1a1a;
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #000;
+}
+
+.scroll {
+  display: flex;
+  overflow-x: auto;
+  gap: 20px;
+}
+
+.hour-block, .day-block {
+  background: #222;
+  padding: 15px;
+  border-radius: 10px;
+  min-width: 120px;
+  text-align: center;
+}
