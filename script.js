@@ -59,6 +59,70 @@ function renderForecast(data) {
     `;
   });
 
+  // Load saved settings
+function loadSettings() {
+  const tempUnit = localStorage.getItem("tempUnit") || "f";
+  const windUnit = localStorage.getItem("windUnit") || "mph";
+  const theme = localStorage.getItem("theme") || "dark";
+  const refresh = localStorage.getItem("refresh") || "60000";
+
+  document.getElementById("tempUnit").value = tempUnit;
+  document.getElementById("windUnit").value = windUnit;
+  document.getElementById("theme").value = theme;
+  document.getElementById("refresh").value = refresh;
+
+  applyTheme(theme);
+  REFRESH_RATE = parseInt(refresh);
+}
+
+// Save settings when changed
+function setupSettingsListeners() {
+  document.getElementById("tempUnit").onchange = e => {
+    localStorage.setItem("tempUnit", e.target.value);
+    getWeather();
+  };
+
+  document.getElementById("windUnit").onchange = e => {
+    localStorage.setItem("windUnit", e.target.value);
+    getWeather();
+  };
+
+  document.getElementById("theme").onchange = e => {
+    localStorage.setItem("theme", e.target.value);
+    applyTheme(e.target.value);
+  };
+
+  document.getElementById("refresh").onchange = e => {
+    localStorage.setItem("refresh", e.target.value);
+    REFRESH_RATE = parseInt(e.target.value);
+  };
+}
+
+// Apply theme
+function applyTheme(theme) {
+  if (theme === "light") {
+    document.body.style.background = "#f2f2f2";
+    document.body.style.color = "#111";
+  } else {
+    document.body.style.background = "#111";
+    document.body.style.color = "#eee";
+  }
+}
+
+// Refresh interval variable
+let REFRESH_RATE = 60000;
+
+// Replace your loop with this:
+async function autoRefresh() {
+  await getWeather();
+  setTimeout(autoRefresh, REFRESH_RATE);
+}
+
+// Initialize
+loadSettings();
+setupSettingsListeners();
+autoRefresh();
+
   document.getElementById("forecast-content").innerHTML = html;
 }
 
