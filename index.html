@@ -26,5 +26,119 @@
 
 
   <script src="script.js"></script>
+
+  <!-- ===================== MEGA UI PACK ===================== -->
+
+<!-- LOCATION BANNER -->
+<div class="card" id="locationBanner">
+  <h2 id="locationName">Weather for Apple Valley</h2>
+  <p id="locationCoords"></p>
+</div>
+
+<!-- TODAY AT A GLANCE -->
+<div class="card">
+  <h2>Today at a Glance</h2>
+  <div id="glanceGrid" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:20px;">
+    <div class="glanceItem"><h3>Visibility</h3><p id="visVal">--</p></div>
+    <div class="glanceItem"><h3>Pressure</h3><p id="pressureVal">--</p></div>
+    <div class="glanceItem"><h3>Dew Point</h3><p id="dewVal">--</p></div>
+    <div class="glanceItem"><h3>Cloud Cover</h3><p id="cloudVal">--</p></div>
+    <div class="glanceItem"><h3>UV Index</h3><p id="uvVal">--</p></div>
+    <div class="glanceItem"><h3>Wind Gust</h3><p id="gustVal">--</p></div>
+  </div>
+</div>
+
+<!-- TEMPERATURE TREND BAR -->
+<div class="card">
+  <h2>Temperature Trend</h2>
+  <div id="tempTrend" style="display:flex; gap:10px; overflow-x:auto;"></div>
+</div>
+
+<!-- PRECIPITATION PROBABILITY -->
+<div class="card">
+  <h2>Precipitation Probability</h2>
+  <div id="precipChart" style="display:flex; gap:10px; overflow-x:auto;"></div>
+</div>
+
+<!-- WIND COMPASS -->
+<div class="card">
+  <h2>Wind Direction</h2>
+  <div id="windCompass" style="text-align:center; font-size:40px;">🧭</div>
+  <p id="windDirText" style="text-align:center;"></p>
+</div>
+
+<!-- HUMIDITY GAUGE -->
+<div class="card">
+  <h2>Humidity Gauge</h2>
+  <div id="humidityGauge" style="height:20px; background:#333; border-radius:10px;">
+    <div id="humidityFill" style="height:100%; width:0%; background:#4aa3ff; border-radius:10px;"></div>
+  </div>
+  <p id="humidityText"></p>
+</div>
+
+<!-- UV METER -->
+<div class="card">
+  <h2>UV Meter</h2>
+  <div id="uvMeter" style="height:20px; background:#333; border-radius:10px;">
+    <div id="uvFill" style="height:100%; width:0%; background:#ffcc00; border-radius:10px;"></div>
+  </div>
+</div>
+
+<!-- SUNRISE / SUNSET ARC -->
+<div class="card">
+  <h2>Sun Cycle</h2>
+  <p id="sunArc"></p>
+</div>
+
+<!-- WEATHER ALERTS -->
+<div class="card">
+  <h2>Weather Alerts</h2>
+  <div id="alertBox">No alerts.</div>
+</div>
+
+<!-- RADAR -->
+<div class="card">
+  <h2>Radar</h2>
+  <iframe 
+    src="https://embed.windy.com/embed2.html?lat=34.5&lon=-117.2&detailLat=34.5&detailLon=-117.2&zoom=7&level=surface&overlay=radar"
+    style="width:100%; height:400px; border-radius:12px; border:none;">
+  </iframe>
+</div>
+
+<!-- MINI WIDGET -->
+<div class="card">
+  <h2>Mini Widget</h2>
+  <div id="miniWidget">Loading...</div>
+</div>
+
+<!-- SYSTEM DIAGNOSTICS -->
+<div class="card">
+  <h2>System Diagnostics</h2>
+  <p>Last Update: <span id="diagUpdate">--</span></p>
+  <p>API Status: <span id="diagAPI">--</span></p>
+  <p>Location Override: <span id="diagLoc">--</span></p>
+  <button id="forceRefresh" style="padding:10px; margin-top:10px;">Force Refresh</button>
+</div>
+
+<!-- COLLAPSIBLE SIDEBAR -->
+<div id="sidebar" style="
+  position:fixed; top:0; left:-260px; width:250px; height:100%;
+  background:#1a1a1a; padding:20px; transition:0.3s; box-shadow:0 0 10px #000;">
+  <h2>Menu</h2>
+  <p>Dashboard</p>
+  <p>Settings</p>
+  <p>About</p>
+</div>
+
+<button id="sidebarToggle" style="
+  position:fixed; top:20px; left:20px; padding:10px; z-index:999;">
+  ☰
+</button>
+
+<!-- FOOTER -->
+<div style="text-align:center; margin-top:40px; opacity:0.5;">
+  <p>Weather Dashboard — Expanded Edition</p>
+</div>
+
 </body>
 </html>
